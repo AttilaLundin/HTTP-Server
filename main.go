@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"sync"
 )
 
 var pl = fmt.Println
@@ -16,17 +15,30 @@ func main() {
 	// start listening to a port
 	listener := setupListener()
 
-	var waitGroup sync.WaitGroup
+	// empty structure because value does not matter
+	clientsPool := make(chan struct{}, MAX_CLIENTS)
 
 	for {
-		connection, err := listener.Accept()
+		tcpConnection, err := listener.Accept()
 		if err != nil {
 			pl(err)
 			continue
 		}
-
+		// create an empty anonymous struct, the value or content of the struct does not matter
+		clientsPool <- struct{}{} // will block if there is MAX_CLIENTS in the clientsPool
+		go func() {
+			clientRequestHandler(tcpConnection)
+			<-clientsPool // removes an entry from clientsPool, allowing another to proceed
+		}()
 	}
 
+}
+
+func clientRequestHandler(connection net.Conn) {
+	//TODO: förmodligen introducera
+
+	//connection.SetReadDeadline()
+	//connection.Read()
 }
 
 func setupListener() net.Listener {
