@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+const MAX_CLIENTS = 10
+
 var pl = fmt.Println
 
 // TODO: double check later if error handling is appropriate
@@ -63,7 +65,7 @@ func setupListener() net.Listener {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			pl("Now listning to Address:", address)
+			pl("Now listening to Address:", address)
 			return listener
 		}
 	}
