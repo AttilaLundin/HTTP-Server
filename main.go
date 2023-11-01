@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"net"
+	"time"
 )
 
 const MAX_CLIENTS = 10
+
+var a = 1
 
 var pl = fmt.Println
 
@@ -14,14 +17,17 @@ func main() {
 	// read_line = strings.TrimSuffix(read_line, "\n")
 	// start listening to a port
 	listener := setupListener()
+	pl(a)
+	a++
 
 	// empty structure because value does not matter
 	clientsPool := make(chan struct{}, MAX_CLIENTS)
 	for {
 		//TODO: avkommentera vid testning
-		//go func() {
-		//	client()
-		//}()
+		go func() {
+			time.Sleep(time.Second * 3)
+			SendTextContent()
+		}()
 
 		tcpConnection, err := listener.Accept()
 		if err != nil {
