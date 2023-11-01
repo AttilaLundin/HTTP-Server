@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"os"
@@ -35,6 +36,7 @@ func ClientRequestHandler(connection net.Conn) {
 
 	// todo: maybe transition to regex l8er
 	notImplemented := map[string]struct{}{"PUT": {}, "DELETE": {}, "OPTIONS": {}, "PATCH": {}, "TRACE": {}, "CONNECT": {}}
+	supportedFileTypes := map[string]struct{}{"text/html": {}, "text/plain": {}, "text/css": {}, "image/gif": {}, "image/jpeg": {}, "image/jpg": {}}
 
 	if request.Method == "GET" {
 		/*
@@ -64,30 +66,49 @@ func ClientRequestHandler(connection net.Conn) {
 		//TODO: hantera get requesten
 	} else if request.Method == "POST" {
 
+		//contentType := request.Header.Get("Content-Type")
+		reqBody, err := io.ReadAll(request.Body)
+		if err != nil {
+			println(err)
+			return
+		}
+		contentType := http.DetectContentType(reqBody)
+		// slice away everything after the ; so we simply get e.g. text/plain or image/gif without "; utf-8" then trim spaces
+		contentType = strings.TrimSpace(strings.Split(contentType, ";")[0])
+		pl(contentType)
+
+		if _, ok := supportedFileTypes[contentType]; !ok || contentType == "application/octet-stream" {
+			pl("this is not a supported type")
+			//TODO: appropriate response
+		}
+
+		//pl("Content Type: ", contentType)
+		//pl(reflect.TypeOf(contentType))
+
 		// Get the file from the request
 		file, header, err := request.FormFile("file")
 		if err != nil {
 			pl(err)
 			return
 		}
-		defer file.Close()
 
-		pl("filename: ", header.Filename)
+		defer func(file multipart.File) {
+			err := file.Close()
+			if err != nil {
+				pl(err)
+			}
+		}(file)
 
-		body, err := io.ReadAll(request.Body)
+		emptyFile, err := os.Create(header.Filename)
 		if err != nil {
 			pl(err)
 			return
 		}
-
-		pl("file vs body", file, body)
-		emptyFile, err := os.Create(header.Filename)
+		_, err = io.Copy(emptyFile, file)
 		if err != nil {
 			pl(err)
 		}
-		io.Copy(emptyFile, file)
 
-		//TODO: hantera post requesten
 	} else if _, ok := notImplemented[request.Method]; ok {
 		//TODO: "Not Implemented" (501)
 	} else {
