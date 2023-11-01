@@ -28,7 +28,8 @@ func main() {
 		}
 		// create an empty anonymous struct, the value or content of the struct does not matter
 		clientsPool <- struct{}{} // will block if there is MAX_CLIENTS in the clientsPool
-		go func() {
+
+		go func() { // create a concurrent request
 			clientRequestHandler(tcpConnection)
 			<-clientsPool // removes an entry from clientsPool, allowing another to proceed
 		}()
@@ -36,11 +37,66 @@ func main() {
 
 }
 
+// stateless communication; handle requests not clients per se
 func clientRequestHandler(connection net.Conn) {
-	//TODO: förmodligen introducera
 
-	//connection.SetReadDeadline()
-	//connection.Read()
+	defer func(connection net.Conn) {
+		err := connection.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(connection)
+
+	//TODO: förmodligen introducera en buffer som läser in data
+	// Parsing av url, regex*? (Go docs: net/http, ServerMux)
+
+	request, err := http.ReadRequest(bufio.NewReader(connection))
+	if err != nil {
+		pl("Error handling the request", err)
+		return
+	}
+
+	notImplemented := map[string]struct{}{"PUT": {}, "DELETE": {}, "OPTIONS": {}, "PATCH": {}, "TRACE": {}, "CONNECT": {}}
+
+	if request.Method == "GET" {
+		path := request.URL.Path
+		file, err := os.Open(path)
+		if err != nil {
+			//TODO: If the requested file does not exist, your server should return a well-formed 404 "Not Found" code.
+		}
+
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}(file)
+
+		//file2, err := os.OpenFile("data.txt", os.O_RDONLY, 0644)
+		fileContents, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		connection.Write(fileContents)
+
+		//TODO: hantera get requesten
+	} else if request.Method == "POST" {
+		//TODO: hantera post requesten
+	} else if _, ok := notImplemented[request.Method]; ok {
+		//TODO: "Not Implemented" (501)
+	} else {
+		//TODO: "Bad Request" (400)
+	}
+
+	/*
+		err := connection.SetReadDeadline(time.Now().Add(time.Second * 100))
+		if err != nil {
+			pl("Error: request timed out")
+			//http response 408 request timeout
+			return
+		}*/
+
 }
 
 func setupListener() net.Listener {
