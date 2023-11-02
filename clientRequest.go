@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -19,7 +20,7 @@ var supportedFileTypes = map[string]struct{}{"text/html": {}, "text/plain": {}, 
 // TODO: Kolla om vi får använda http.ResponseWriter
 
 // stateless communication; handle requests not clients per se
-func ClientRequestHandler(connection net.Conn) {
+func ClientRequestHandler(connection net.Conn, lock *sync.Mutex) {
 
 	defer func(connection net.Conn) {
 		connectionError := connection.Close()
@@ -32,46 +33,47 @@ func ClientRequestHandler(connection net.Conn) {
 	timeoutError := connection.SetReadDeadline(time.Now().Add(time.Second * 100))
 	if timeoutError != nil {
 		log.Println("Error: request timed out")
-		respondRequestTimeout()
+		respond(CODE(408))
 		return
 	}
 
 	// man har metoder man kan använda för att få åtkomst till requestens info
 	request, readRequesError := http.ReadRequest(bufio.NewReader(connection))
 	if readRequesError != nil {
-		respondInternalServerError()
+		respond(CODE(500))
 		return
 	}
 
 	switch request.Method {
 	case "GET":
-		handleGet(request)
+		handleGet(request, lock)
 	case "POST":
-		handlePOST(request)
+		code := handlePOST(request, lock)
+		respond(code)
+
 	case "PUT", "DELETE", "OPTIONS", "PATCH", "TRACE", "CONNECT":
 		respond(CODE(500))
 	default:
 		respond(CODE(400))
 	}
+
 }
 
-func handlePOST(request *http.Request) {
+func handlePOST(request *http.Request, emptyFileMutex *sync.Mutex) CODE {
 
 	//TODO: kolla om det är ok att vå läser in request två gånger
 
 	// Get the file from the request
 	file, header, formFileError := request.FormFile("file")
 	if formFileError != nil {
-		respondInternalServerError()
-		return
+		return CODE(500)
 	}
 	defer file.Close()
 
 	//contentType := request.Header.Get("Content-Type")
 	reqBody, err := io.ReadAll(request.Body)
 	if err != nil {
-		respondInternalServerError()
-		return
+		return CODE(500)
 	}
 
 	contentType := http.DetectContentType(reqBody)
@@ -80,32 +82,27 @@ func handlePOST(request *http.Request) {
 	contentType = strings.TrimSpace(strings.Split(contentType, ";")[0])
 
 	if _, ok := supportedFileTypes[contentType]; !ok || contentType == "application/octet-stream" {
-		fmt.Println("this is not a supported type")
-		respondBadRequest()
-		return
+		return CODE(408)
 	}
 
 	pl("request.URL.Path", request.URL.Path)
 	if !strings.HasPrefix(request.URL.Path, "/storage/") {
-		pl("BadRequest")
-		respondBadRequest()
-		return
+		return CODE(400)
 	}
 
 	lock.Lock()
 	defer lock.Unlock()
 	emptyFile, creationError := os.Create(request.URL.Path[1:] + "/" + header.Filename)
 	if creationError != nil {
-		respondInternalServerError()
-		return
+		return CODE(500)
 	}
 	defer emptyFile.Close()
 
 	_, copyError := io.Copy(emptyFile, file)
 	if copyError != nil {
-		respondInternalServerError()
-		return
+		return CODE(500)
 	}
+	return CODE(200)
 }
 
 func handleGet(request *http.Request, emptyFileMutex *sync.Mutex) {
@@ -172,28 +169,20 @@ func handleGet(request *http.Request, emptyFileMutex *sync.Mutex) {
 func respond(code CODE) {
 	switch code {
 	case 200:
+		pl("should respond with HTTP Status Code 200 a OK")
 		//respond with HTTP Status Code 200 a OK
 	case 500:
+		pl("should respond with HTTP Status Code 501 NotImplemented")
 		////respond with HTTP Status Code 501 NotImplemented
 	case 400:
+		pl("should respond with HTTP Status Code 400 BadRequest")
 		//respond with HTTP Status Code 400 BadRequest
 	case 408:
+		pl("should respond with HTTP Status Code 408 RequestTimeout")
 		//respond with HTTP Status Code 408 RequestTimeout
 	default:
+		pl("should respond with HTTP Status Code 500 InternalServerError")
 		//respond with HTTP Status Code 500 InternalServerError
 
 	}
-}
-
-func respondRequestNotImplemented() {
-	//respond with HTTP Status Code 500
-}
-func respondBadRequest() {
-	//respond with HTTP Status Code 400
-}
-func respondRequestTimeout() {
-	//respond with HTTP Status Code 408
-}
-func respondInternalServerError() {
-	//respond with HTTP Status Code 500
 }

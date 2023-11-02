@@ -27,7 +27,7 @@ func main() {
 	for {
 		//TODO: avkommentera vid testning
 		go func() {
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Millisecond * 500)
 			testFunctions[testNr]()
 			testNr++
 			if testNr == len(testFunctions) {
@@ -36,6 +36,7 @@ func main() {
 		}()
 
 		tcpConnection, err := listener.Accept()
+
 		if err != nil {
 			pl(err)
 			continue
@@ -44,7 +45,8 @@ func main() {
 		clientsPool <- struct{}{} // will block if there is MAX_CLIENTS in the clientsPool
 
 		go func() { // create a concurrent request
-			ClientRequestHandler(tcpConnection)
+
+			ClientRequestHandler(tcpConnection, &lock)
 			<-clientsPool // removes an entry from clientsPool, allowing another to proceed
 		}()
 	}

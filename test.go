@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -347,4 +348,37 @@ func SendGIFContent() {
 
 	// Here you might want to check the response status, handle the response, etc.
 	fmt.Println("GIF file sent successfully, status code:", resp.Status)
+}
+
+func SendGetTextContent() {
+	// Define the URL to send the GET request to
+	url := "http://localhost:5431/storage/text/plain/testfile.txt"
+
+	// Create a new HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("Error sending HTTP GET request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check if the HTTP status code is 200 OK
+	if resp.StatusCode != http.StatusOK {
+		log.Fatal("Expected HTTP status code 200, got %d", resp.StatusCode)
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("Error reading response body: %v", err)
+	}
+
+	// Define the expected response body content
+	expectedContent := "test"
+
+	// Validate the response body content
+	if string(body) != expectedContent {
+		log.Fatal("Expected response body to be %q, got %q", expectedContent, body)
+	}
+
+	fmt.Println("GET request and response validation successful")
 }
