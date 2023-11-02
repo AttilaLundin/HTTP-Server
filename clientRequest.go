@@ -43,10 +43,9 @@ func ClientRequestHandler(connection net.Conn, lock *sync.Mutex) {
 	}
 
 	// man har metoder man kan använda för att få åtkomst till requestens info
-	request, readRequesError := http.ReadRequest(bufio.NewReader(connection))
-	if readRequesError != nil {
-		respond(CODE(500))
-		return
+	request, readRequestError := http.ReadRequest(bufio.NewReader(connection))
+	if readRequestError != nil {
+		CODE(500).respond(connection)
 	}
 
 	switch request.Method {
