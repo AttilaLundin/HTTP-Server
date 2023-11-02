@@ -50,7 +50,6 @@ func main() {
 			<-clientsPool // removes an entry from clientsPool, allowing another to proceed
 		}()
 	}
-
 }
 
 func setupListener() net.Listener {
