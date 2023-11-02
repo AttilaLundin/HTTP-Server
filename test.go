@@ -6,24 +6,20 @@ import (
 	"io"
 	"log"
 	"mime/multipart"
-	"net"
 	"net/http"
 	"os"
+	"time"
 )
 
-func Client() {
-	conn, err := net.Dial("tcp", "localhost:5431")
-	if err != nil {
-		fmt.Println("Error connecting to server:", err)
-		return
-	}
-	defer conn.Close()
-
-	_, err = conn.Write([]byte("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"))
-	if err != nil {
-		fmt.Println("Error sending request:", err)
-		return
-	}
+func Test() {
+	time.Sleep(time.Second * 4)
+	SendTextContent()
+	SendCSSContent()
+	SendHTMLContent()
+	SendGIFContent()
+	SendJPEGContent()
+	SendJPGContent()
+	SendGetTextContent()
 }
 
 func SendTextContent() {
@@ -53,7 +49,6 @@ func SendTextContent() {
 		fmt.Println("Error closing writer:", err)
 		return
 	}
-	//storage / textfilestestfile.txt
 
 	// Create a new HTTP POST request
 	req, err := http.NewRequest("POST", "http://localhost:5431/storage/text/plain", &requestBody)
@@ -72,6 +67,7 @@ func SendTextContent() {
 		return
 	}
 	defer resp.Body.Close()
+	fmt.Println("Plain file sent successfully, status code:", resp.Status)
 }
 
 func SendHTMLContent() {
@@ -380,5 +376,5 @@ func SendGetTextContent() {
 		log.Fatal("Expected response body to be %q, got %q", expectedContent, body)
 	}
 
-	fmt.Println("GET request and response validation successful")
+	fmt.Println("200!! GET request and response validation successful")
 }

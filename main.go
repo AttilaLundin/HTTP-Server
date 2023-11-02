@@ -14,27 +14,25 @@ var pl = fmt.Println
 
 var lock sync.Mutex
 var responseWriter http.ResponseWriter
-var testFunctions = [7]func(){SendTextContent, SendHTMLContent, SendCSSContent, SendJPGContent, SendJPEGContent, SendGIFContent, SendGetTextContent}
-var testNr = 0
+
+// var testFunctions = [7]func(){SendTextContent, SendHTMLContent, SendCSSContent, SendJPGContent, SendJPEGContent, SendGIFContent}
+//var testNr = 0
 
 // TODO: double check later if error handling is appropriate
+
 func main() {
+
+	go Test()
+
 	// read_line = strings.TrimSuffix(read_line, "\n")
 	// start listening to a port
 	listener := setupListener()
 	// empty structure because value does not matter
 	clientsPool := make(chan struct{}, MAX_CLIENTS)
-	for {
-		//TODO: avkommentera vid testning
-		go func() {
-			time.Sleep(time.Millisecond * 500)
-			testFunctions[testNr]()
-			testNr++
-			if testNr == len(testFunctions) {
-				return
-			}
-		}()
 
+	//TODO: avkommentera vid testning
+
+	for {
 		tcpConnection, err := listener.Accept()
 
 		if err != nil {
