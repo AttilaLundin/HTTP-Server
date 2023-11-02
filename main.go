@@ -14,9 +14,6 @@ var pl = fmt.Println
 var lock sync.Mutex
 var responseWriter http.ResponseWriter
 
-// var testFunctions = [7]func(){SendTextContent, SendHTMLContent, SendCSSContent, SendJPGContent, SendJPEGContent, SendGIFContent}
-//var testNr = 0
-
 // TODO: double check later if error handling is appropriate
 
 func main() {
