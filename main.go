@@ -8,17 +8,16 @@ import (
 
 const MAX_CLIENTS = 10
 
-var a = 1
-
 var pl = fmt.Println
+
+var testFunctions = [6]func(){SendTextContent, SendHTMLContent, SendCSSContent, SendJPGContent, SendJPEGContent, SendGIFContent}
+var testNr = 0
 
 // TODO: double check later if error handling is appropriate
 func main() {
 	// read_line = strings.TrimSuffix(read_line, "\n")
 	// start listening to a port
 	listener := setupListener()
-	pl(a)
-	a++
 
 	// empty structure because value does not matter
 	clientsPool := make(chan struct{}, MAX_CLIENTS)
@@ -26,7 +25,12 @@ func main() {
 		//TODO: avkommentera vid testning
 		go func() {
 			time.Sleep(time.Second * 3)
-			SendTextContent()
+			testFunctions[testNr]()
+			testNr++
+			if testNr == len(testFunctions) {
+				close(clientsPool)
+				return
+			}
 		}()
 
 		tcpConnection, err := listener.Accept()
