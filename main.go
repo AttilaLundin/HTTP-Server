@@ -28,7 +28,6 @@ func main() {
 			testFunctions[testNr]()
 			testNr++
 			if testNr == len(testFunctions) {
-				close(clientsPool)
 				return
 			}
 		}()
