@@ -92,6 +92,8 @@ func handlePOST(request *http.Request) {
 		return
 	}
 
+	lock.Lock()
+	defer lock.Unlock()
 	emptyFile, creationError := os.Create(request.URL.Path[1:] + "/" + header.Filename)
 	if creationError != nil {
 		respondInternalServerError()
@@ -106,31 +108,63 @@ func handlePOST(request *http.Request) {
 	}
 }
 
-func handleGet(request *http.Request) { /*
-		path := request.URL.Path
-		file, err := os.Open(path)
-		if err != nil {
-			//TODO: If the requested file does not exist, your server should return a well-formed 404 "Not Found" code.
-		}
+func handleGet(request *http.Request, emptyFileMutex *sync.Mutex) {
+	path := request.URL.Path
+	fmt.Println("------------")
+	fmt.Println(path)
+	emptyFileMutex.Lock()
+	defer emptyFileMutex.Unlock()
 
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				log.Fatal(err)
-			}
-		}(file)
+	if !strings.HasPrefix(request.URL.Path, "/storage/") {
+		pl("prefix fel")
+		respond(CODE(400))
+	}
+	path = path[1:]
+	_, statErr := os.Stat(path)
+	if statErr != nil {
+		pl("The file doesnt exist!!!?!?!?!?!?!?! what frågetecken")
+	}
+	fmt.Println("this is path after reg", path)
 
-		//file2, err := os.OpenFile("data.txt", os.O_RDONLY, 0644)
-		fileContents, err := ioutil.ReadAll(file)
-		if err != nil {
-			log.Fatal(err)
-		}
+	var responseBody bytes.Buffer
 
-		connection.Write(fileContents)
+	// Create a new multipart writer
+	responseBodyWriter := multipart.NewWriter(&responseBody)
+	pl(responseBodyWriter.FormDataContentType())
+	// Create a form file field with the file name "image.gif"
 
+	pl(responseBodyWriter.FormDataContentType())
+
+	file, openError := os.Open(path)
+	if openError != nil {
+		pl("openError")
+		respond(CODE(404))
+	}
+
+	defer file.Close()
+	// Create a form file field with the file name "image.gif"
+
+	fmt.Println("-----------dafgs")
+
+	/*fileContents, readError := io.ReadAll(file)
+	fmt.Println("-----------dafgs numero 2")
+	if readError != nil {
+		pl(path)
+		pl("AAAAHG OUGA BOOGA")
+		log.Fatal(readError)
+	}
 	*/
+	response := &http.Response{
+		Status:     "200 OK",           // Setting the status text
+		StatusCode: http.StatusOK,      // Setting the status code
+		Proto:      "HTTP/1.1",         // Setting the protocol version
+		ProtoMajor: 1,                  // Major protocol version
+		ProtoMinor: 1,                  // Minor protocol version
+		Header:     make(http.Header),  // Initializing the Header map
+		Body:       io.NopCloser(file), // Setting the response body
+	}
+	response.Header.Set("Content-Type", multipart.NewWriter(&responseBody).FormDataContentType())
 
-	//TODO: hantera get requesten
 }
 
 // TODO: Skriv om så att vi bara har en funktion och lägger in koder

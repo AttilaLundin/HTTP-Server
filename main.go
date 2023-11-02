@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net"
+	"net/http"
+	"sync"
 	"time"
 )
 
@@ -10,7 +12,9 @@ const MAX_CLIENTS = 10
 
 var pl = fmt.Println
 
-var testFunctions = [6]func(){SendTextContent, SendHTMLContent, SendCSSContent, SendJPGContent, SendJPEGContent, SendGIFContent}
+var lock sync.Mutex
+var responseWriter http.ResponseWriter
+var testFunctions = [7]func(){SendTextContent, SendHTMLContent, SendCSSContent, SendJPGContent, SendJPEGContent, SendGIFContent, SendGetTextContent}
 var testNr = 0
 
 // TODO: double check later if error handling is appropriate
@@ -18,7 +22,6 @@ func main() {
 	// read_line = strings.TrimSuffix(read_line, "\n")
 	// start listening to a port
 	listener := setupListener()
-
 	// empty structure because value does not matter
 	clientsPool := make(chan struct{}, MAX_CLIENTS)
 	for {
