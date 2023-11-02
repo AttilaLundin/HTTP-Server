@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 	"sync"
-	"time"
 )
 
 const MAX_CLIENTS = 10
@@ -21,16 +20,13 @@ var responseWriter http.ResponseWriter
 // TODO: double check later if error handling is appropriate
 
 func main() {
-
+	//TODO: comment out when not testing
 	go Test()
 
-	// read_line = strings.TrimSuffix(read_line, "\n")
 	// start listening to a port
 	listener := setupListener()
 	// empty structure because value does not matter
 	clientsPool := make(chan struct{}, MAX_CLIENTS)
-
-	//TODO: avkommentera vid testning
 
 	for {
 		tcpConnection, err := listener.Accept()

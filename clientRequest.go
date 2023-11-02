@@ -65,7 +65,6 @@ func ClientRequestHandler(connection net.Conn, lock *sync.Mutex) {
 	default:
 		CODE(400).respond(connection)
 	}
-
 }
 
 func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
