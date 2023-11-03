@@ -17,14 +17,16 @@ func INITTEST() {
 }
 
 func Test() {
-	go SendGIFContent()
-	go SendJPEGContent()
-	go SendJPGContent()
-	go SendGetTextContent()
-	go SendCSSContent()
-	go SendGetTextContent()
-	go SendHTMLContent()
-	time.Sleep(time.Second * 10)
+	SendGIFContent()
+	SendJPEGContent()
+	SendJPGContent()
+	SendTextContent()
+	SendCSSContent()
+	SendHTMLContent()
+	SendGetTextContent()
+
+	//cba making a channel, so we wait to make sure that the functions have executed
+	time.Sleep(time.Second * 2)
 }
 
 func SendTextContent() {
