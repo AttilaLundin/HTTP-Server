@@ -32,6 +32,7 @@ func main() {
 			pl(err)
 			continue
 		}
+
 		// create an empty anonymous struct, the value or content of the struct does not matter
 		clientsPool <- struct{}{} // will block if there is MAX_CLIENTS in the clientsPool
 
@@ -39,7 +40,12 @@ func main() {
 
 			ClientRequestHandler(tcpConnection, &lock)
 			<-clientsPool // removes an entry from clientsPool, allowing another to proceed
+			err := tcpConnection.Close()
+			if err != nil {
+				return
+			}
 		}()
+
 	}
 }
 

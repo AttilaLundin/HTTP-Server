@@ -25,15 +25,7 @@ var supportedFileTypes = map[string]struct{}{"text/html": {}, "text/plain": {}, 
 
 // stateless communication; handle requests not clients per se
 func ClientRequestHandler(connection net.Conn, lock *sync.Mutex) {
-
-	defer func(connection net.Conn) {
-		connectionError := connection.Close()
-		if connectionError != nil {
-			log.Fatal(connectionError)
-			//TODO: ändra
-		}
-	}(connection)
-
+	//defer connection.Close()
 	timeoutError := connection.SetReadDeadline(time.Now().Add(time.Second * 100))
 	if timeoutError != nil {
 		log.Println("Error: request timed out")
@@ -95,8 +87,8 @@ func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
 		return CODE(408)
 	}
 
-	lock.Lock()
-	defer lock.Unlock()
+	//lock.Lock()
+	//defer lock.Unlock()
 	emptyFile, creationError := os.Create(request.URL.Path[1:] + "/" + header.Filename)
 	if creationError != nil {
 		return CODE(500)
@@ -124,8 +116,8 @@ func handleGet(request *http.Request, lock *sync.Mutex) (CODE, getResponse) {
 		return CODE(400), getResponse{}
 	}
 
-	lock.Lock()
-	defer lock.Unlock()
+	//lock.Lock()
+	//defer lock.Unlock()
 
 	fileInBytes, readError := os.ReadFile(path)
 	if readError != nil {
