@@ -21,12 +21,13 @@ type getResponse struct {
 	fileInfo    os.FileInfo
 }
 
+// todo: dubbelkolla så att vi inte missar något när vi checkar "properly formatted" http
 var supportedFileTypes = map[string]struct{}{"text/html": {}, "text/plain": {}, "text/css": {}, "image/gif": {}, "image/jpeg": {}, "image/jpg": {}}
 
 // stateless communication; handle requests not clients per se
 func ClientRequestHandler(connection net.Conn, lock *sync.Mutex) {
 	//defer connection.Close()
-	timeoutError := connection.SetReadDeadline(time.Now().Add(time.Second * 100))
+	timeoutError := connection.SetReadDeadline(time.Now().Add(time.Second * 60))
 	if timeoutError != nil {
 		log.Println("Error: request timed out")
 		CODE(400).respond(connection)
