@@ -25,7 +25,7 @@ type getResponse struct {
 var supportedFileTypes = map[string]struct{}{"text/html": {}, "text/plain": {}, "text/css": {}, "image/gif": {}, "image/jpeg": {}, "image/jpg": {}}
 
 // stateless communication; handle requests not clients per se
-func ClientRequestHandler(connection net.Conn, lock *sync.Mutex) {
+func ClientRequestHandler(connection *net.TCPConn, lock *sync.Mutex) {
 	//defer connection.Close()
 	timeoutError := connection.SetReadDeadline(time.Now().Add(time.Second * 60))
 	if timeoutError != nil {
@@ -74,22 +74,22 @@ func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
 	}
 	defer file.Close()
 
-	//contentType := request.Header.Get("Content-Type")
+	contentType := request.Header.Get("Content-Type")
 	reqBody, err := io.ReadAll(request.Body)
 	if err != nil {
 		return CODE(500)
 	}
 
 	// slice away everything after the ; so we simply get e.g. text/plain or text/css without "; utf-8" then trim spaces
-	contentType := http.DetectContentType(reqBody)
+	contentType = http.DetectContentType(reqBody)
 	contentType = strings.TrimSpace(strings.Split(contentType, ";")[0])
 
 	if _, ok := supportedFileTypes[contentType]; !ok || contentType == "application/octet-stream" {
 		return CODE(408)
 	}
 
-	//lock.Lock()
-	//defer lock.Unlock()
+	lock.Lock()
+	defer lock.Unlock()
 	emptyFile, creationError := os.Create(request.URL.Path[1:] + "/" + header.Filename)
 	if creationError != nil {
 		return CODE(500)
@@ -117,8 +117,8 @@ func handleGet(request *http.Request, lock *sync.Mutex) (CODE, getResponse) {
 		return CODE(400), getResponse{}
 	}
 
-	//lock.Lock()
-	//defer lock.Unlock()
+	lock.Lock()
+	defer lock.Unlock()
 
 	fileInBytes, readError := os.ReadFile(path)
 	if readError != nil {

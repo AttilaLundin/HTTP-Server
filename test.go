@@ -11,15 +11,20 @@ import (
 	"time"
 )
 
+func INITTEST() {
+	time.Sleep(time.Second * 3)
+	Test()
+}
+
 func Test() {
-	time.Sleep(time.Second * 4)
-	SendTextContent()
-	SendCSSContent()
-	SendHTMLContent()
-	SendGIFContent()
-	SendJPEGContent()
-	SendJPGContent()
-	SendGetTextContent()
+	go SendGIFContent()
+	go SendJPEGContent()
+	go SendJPGContent()
+	go SendGetTextContent()
+	go SendCSSContent()
+	go SendGetTextContent()
+	go SendHTMLContent()
+	time.Sleep(time.Second * 10)
 }
 
 func SendTextContent() {
