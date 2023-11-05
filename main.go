@@ -1,6 +1,7 @@
 package main
 
 import (
+	"HTTP_Server/test"
 	"fmt"
 	"net"
 	"net/http"
@@ -18,7 +19,7 @@ var responseWriter http.ResponseWriter
 
 func main() {
 	//TODO: comment out when not testing
-	go INITTEST()
+	go test.INITTEST()
 
 	// start listening to a port
 	tcpListener := setupListener()
