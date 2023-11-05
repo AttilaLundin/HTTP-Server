@@ -63,7 +63,7 @@ func ClientRequestHandler(connection *net.TCPConn, lock *sync.Mutex) {
 func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
 
 	pl("request.URL.Path", request.URL.Path)
-	if !strings.HasPrefix(request.URL.Path, "/storage/") {
+	if !strings.HasPrefix(request.URL.Path, "/web-server/storage/") {
 		return CODE(400)
 	}
 
@@ -74,14 +74,14 @@ func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
 	}
 	defer file.Close()
 
-	contentType := request.Header.Get("Content-Type")
+	//contentType := request.Header.Get("Content-Type")
 	reqBody, err := io.ReadAll(request.Body)
 	if err != nil {
 		return CODE(500)
 	}
 
 	// slice away everything after the ; so we simply get e.g. text/plain or text/css without "; utf-8" then trim spaces
-	contentType = http.DetectContentType(reqBody)
+	contentType := http.DetectContentType(reqBody)
 	contentType = strings.TrimSpace(strings.Split(contentType, ";")[0])
 
 	if _, ok := supportedFileTypes[contentType]; !ok || contentType == "application/octet-stream" {
@@ -107,7 +107,7 @@ func handleGet(request *http.Request, lock *sync.Mutex) (CODE, getResponse) {
 
 	path := request.URL.Path
 
-	if !strings.HasPrefix(request.URL.Path, "/storage/") {
+	if !strings.HasPrefix(request.URL.Path, "/web-server/storage/") {
 		return CODE(400), getResponse{}
 	}
 

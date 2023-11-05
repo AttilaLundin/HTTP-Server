@@ -17,6 +17,7 @@ func INITTEST() {
 }
 
 func Test() {
+	SendGetGIFContent()
 	SendGIFContent()
 	SendJPEGContent()
 	SendJPGContent()
@@ -58,7 +59,7 @@ func SendTextContent() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/storage/text/plain", &requestBody)
+	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/text/plain", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -107,7 +108,7 @@ func SendHTMLContent() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/storage/text/html", &requestBody)
+	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/text/html", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -158,7 +159,7 @@ func SendCSSContent() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/storage/text/css", &requestBody)
+	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/text/css", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -216,7 +217,7 @@ func SendJPGContent() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/storage/image/jpg", &requestBody)
+	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/image/jpg", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -274,7 +275,7 @@ func SendJPEGContent() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/storage/image/jpeg", &requestBody)
+	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/image/jpeg", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -332,7 +333,7 @@ func SendGIFContent() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/storage/image/gif", &requestBody)
+	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/image/gif", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -353,9 +354,40 @@ func SendGIFContent() {
 	fmt.Println("GIF file sent successfully, status code:", resp.Status)
 }
 
+func SendGetGIFContent() {
+	// Define the URL to send the GET request to
+	url := "http://localhost:5431/web-server/storage/image/gif/skeleton.gif"
+
+	// Create a new HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("Error sending HTTP GET request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("Statuscode of the response:", resp.StatusCode)
+
+	// Check if the HTTP status code is 200 OK
+	if resp.StatusCode != http.StatusOK {
+		log.Fatal("Expected HTTP status code 200, got %d", resp.StatusCode)
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("Error reading response body: %v", err)
+	}
+	emptyFile, creationError := os.Create("clienttest/skeleton.gif")
+	if creationError != nil {
+		log.Fatal(creationError)
+	}
+	io.Copy(emptyFile, bytes.NewReader(body))
+	fmt.Println("200!! GET GIF request and response validation successful")
+}
+
 func SendGetTextContent() {
 	// Define the URL to send the GET request to
-	url := "http://localhost:5431/storage/text/plain/testfile.txt"
+	url := "http://localhost:5431/web-server/storage/text/plain/testfile.txt"
 
 	// Create a new HTTP GET request
 	resp, err := http.Get(url)
