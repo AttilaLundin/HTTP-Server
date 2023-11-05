@@ -25,7 +25,7 @@ type getResponse struct {
 var supportedFileTypes = map[string]struct{}{"text/html": {}, "text/plain": {}, "text/css": {}, "image/gif": {}, "image/jpeg": {}, "image/jpg": {}}
 
 // stateless communication; handle requests not clients per se
-func ClientRequestHandler(connection *net.TCPConn, lock *sync.Mutex) {
+func requestHandler(connection *net.TCPConn, lock *sync.Mutex) {
 	//defer connection.Close()
 	timeoutError := connection.SetReadDeadline(time.Now().Add(time.Second * 60))
 	if timeoutError != nil {
@@ -62,7 +62,6 @@ func ClientRequestHandler(connection *net.TCPConn, lock *sync.Mutex) {
 
 func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
 
-	pl("request.URL.Path", request.URL.Path)
 	if !strings.HasPrefix(request.URL.Path, "/web-server/storage/") {
 		return CODE(400)
 	}

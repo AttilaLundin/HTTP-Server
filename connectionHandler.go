@@ -4,16 +4,13 @@ import (
 	"HTTP_Server/test"
 	"fmt"
 	"net"
-	"net/http"
 	"sync"
 )
 
 const MAX_CLIENTS = 10
 
 var pl = fmt.Println
-
 var lock sync.Mutex
-var responseWriter http.ResponseWriter
 
 // TODO: double check later if error handling is appropriate
 
@@ -26,19 +23,21 @@ func main() {
 
 	// empty structure because value does not matter
 	requestChannel := make(chan struct{}, MAX_CLIENTS)
+
 	for {
-		tcpConnection, err := tcpListener.AcceptTCP()
-		err = tcpConnection.SetKeepAlive(true)
-		if err != nil {
-			pl(err)
-		}
 
 		//create an empty anonymous struct, the value or content of the struct does not matter
 		requestChannel <- struct{}{} // will block if there is MAX_CLIENTS in the clientsPool
 
+		tcpConnection, err := tcpListener.AcceptTCP()
+		if err != nil {
+			pl(err)
+			continue
+		}
+
 		go func() { // create a concurrent request
 
-			ClientRequestHandler(tcpConnection, &lock)
+			requestHandler(tcpConnection, &lock)
 			<-requestChannel // removes an entry from clientsPool, allowing another to proceed
 			err := tcpConnection.Close()
 			if err != nil {

@@ -17,20 +17,22 @@ func INITTEST() {
 }
 
 func Test() {
-	SendGetGIFContent()
-	SendGIFContent()
-	SendJPEGContent()
-	SendJPGContent()
-	SendTextContent()
-	SendCSSContent()
-	SendHTMLContent()
-	SendGetTextContent()
 
+	go testPostText()
+	go testPostGif()
+	go testPostHtml()
+	go testPostCss()
+	go testPostJpg()
+	go testPostJpeg()
+
+	time.Sleep(time.Second * 3)
+	go testGetGif()
+	go testGetText()
 	//cba making a channel, so we wait to make sure that the functions have executed
 	time.Sleep(time.Second * 2)
 }
 
-func SendTextContent() {
+func testPostText() {
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
 
@@ -78,7 +80,7 @@ func SendTextContent() {
 	fmt.Println("Plain file sent successfully, status code:", resp.Status)
 }
 
-func SendHTMLContent() {
+func testPostHtml() {
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
 
@@ -129,7 +131,7 @@ func SendHTMLContent() {
 	fmt.Println("HTML file sent successfully, status code:", resp.Status)
 }
 
-func SendCSSContent() {
+func testPostCss() {
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
 
@@ -180,9 +182,9 @@ func SendCSSContent() {
 	fmt.Println("CSS file sent successfully, status code:", resp.Status)
 }
 
-func SendJPGContent() {
+func testPostJpg() {
 	// Open the JPG file from the testimages directory
-	file, err := os.Open("testimages/Cat03.jpg")
+	file, err := os.Open("test/testimages/Cat03.jpg")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -238,9 +240,9 @@ func SendJPGContent() {
 	fmt.Println("JPG file sent successfully, status code:", resp.Status)
 }
 
-func SendJPEGContent() {
+func testPostJpeg() {
 	// Open the JPEG file from the testimages directory
-	file, err := os.Open("testimages/astronaut-with-pencil-pen-tool-created-clipping-path-included-jpeg-easy-composite.jpeg")
+	file, err := os.Open("test/testimages/astronaut-with-pencil-pen-tool-created-clipping-path-included-jpeg-easy-composite.jpeg")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -274,18 +276,11 @@ func SendJPEGContent() {
 		return
 	}
 
-	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/image/jpeg", &requestBody)
-	if err != nil {
-		fmt.Println("Error creating HTTP request:", err)
-		return
-	}
+	// Set the content type to the multipart form's content type
+	contentType := writer.FormDataContentType()
 
-	// Set the Content-Type header to the multipart form's content type
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	// Send the HTTP request
-	resp, err := http.DefaultClient.Do(req)
+	// Perform the HTTP POST request
+	resp, err := http.Post("http://localhost:5431/web-server/storage/image/jpeg", contentType, &requestBody)
 	if err != nil {
 		fmt.Println("Error sending HTTP request:", err)
 		return
@@ -296,9 +291,9 @@ func SendJPEGContent() {
 	fmt.Println("JPEG file sent successfully, status code:", resp.Status)
 }
 
-func SendGIFContent() {
+func testPostGif() {
 	// Open the GIF file from the testimages directory
-	file, err := os.Open("testimages/skeleton.gif")
+	file, err := os.Open("test/testimages/skeleton.gif")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -354,7 +349,7 @@ func SendGIFContent() {
 	fmt.Println("GIF file sent successfully, status code:", resp.Status)
 }
 
-func SendGetGIFContent() {
+func testGetGif() {
 	// Define the URL to send the GET request to
 	url := "http://localhost:5431/web-server/storage/image/gif/skeleton.gif"
 
@@ -377,7 +372,7 @@ func SendGetGIFContent() {
 	if err != nil {
 		log.Fatal("Error reading response body: %v", err)
 	}
-	emptyFile, creationError := os.Create("clienttest/skeleton.gif")
+	emptyFile, creationError := os.Create("test/clienttest/skeleton.gif")
 	if creationError != nil {
 		log.Fatal(creationError)
 	}
@@ -385,7 +380,7 @@ func SendGetGIFContent() {
 	fmt.Println("200!! GET GIF request and response validation successful")
 }
 
-func SendGetTextContent() {
+func testGetText() {
 	// Define the URL to send the GET request to
 	url := "http://localhost:5431/web-server/storage/text/plain/testfile.txt"
 
