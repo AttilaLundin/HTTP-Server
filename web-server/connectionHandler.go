@@ -16,7 +16,10 @@ var lock sync.Mutex
 
 func StartWebServer() {
 	//TODO: comment out when not testing
-	go test.INITTEST()
+
+	// empty structure because value does not matter
+	requestChannel := make(chan struct{}, maxClients)
+	//go test.INITTEST(&testLock)
 
 	// start listening to a port
 	tcpListener := setupListener()
@@ -41,6 +44,7 @@ func StartWebServer() {
 			<-requestChannel // removes an entry from clientsPool, allowing another to proceed
 			err := tcpConnection.Close()
 			if err != nil {
+				fmt.Println(err)
 				return
 			}
 		}()

@@ -139,21 +139,27 @@ func (code CODE) respond(clientConnection *net.TCPConn) {
 func sendResponse(response *http.Response, connection *net.TCPConn) {
 	// convert body to array of bytes so we can write it to client through connection
 	buf := bytes.Buffer{}
-	if err := response.Write(&buf); err != nil {
-		panic(err)
+	err := response.Write(&buf)
+	if err != nil {
+		pl("Error 1 is: ", err)
 	}
-	if _, err := connection.Write(buf.Bytes()); err != nil {
-		panic(err)
+
+	_, err = connection.Write(buf.Bytes())
+	if err != nil {
+		pl("THE CONNECTION IN SENDREQUEST IS: ", connection)
+		pl("Error 2 is: ", err)
 	}
 }
 func sendRequest(request *http.Request, connection *net.TCPConn) {
+
 	// convert body to array of bytes so we can write it to client through connection
 	buf := bytes.Buffer{}
 	if err := request.Write(&buf); err != nil {
-		panic(err)
+		pl("Error 1 is: ", err)
 	}
 	if _, err := connection.Write(buf.Bytes()); err != nil {
-		panic(err)
+		//pl("Conn is: ", connection)
+		pl("Error 2 is: ", err)
 	}
 }
 

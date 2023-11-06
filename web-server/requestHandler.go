@@ -61,7 +61,6 @@ func requestHandler(connection *net.TCPConn, lock *sync.Mutex) {
 }
 
 func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
-
 	if !strings.HasPrefix(request.URL.Path, "/web-server/storage/") {
 		return CODE(400)
 	}
@@ -89,6 +88,7 @@ func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
 
 	lock.Lock()
 	defer lock.Unlock()
+
 	emptyFile, creationError := os.Create(request.URL.Path[1:] + "/" + header.Filename)
 	if creationError != nil {
 		return CODE(500)
@@ -97,6 +97,7 @@ func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
 
 	_, copyError := io.Copy(emptyFile, file)
 	if copyError != nil {
+
 		return CODE(500)
 	}
 	return CODE(200)
