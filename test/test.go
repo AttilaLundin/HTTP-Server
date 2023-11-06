@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-func INITTEST() {
+func INITTEST(testlock *sync.Mutex) {
 	time.Sleep(time.Second * 3)
-	Test()
+	Test(testlock)
 }
 
 func Test(testlock *sync.Mutex) {
@@ -260,6 +260,7 @@ func testPostJpg(channel chan struct{}) {
 
 func testPostJpeg(testlock *sync.Mutex) {
 	// Open the JPEG file from the testimages directory
+
 	file, err := os.Open("test/testimages/astronaut-with-pencil-pen-tool-created-clipping-path-included-jpeg-easy-composite.jpeg")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
