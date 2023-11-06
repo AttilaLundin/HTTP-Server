@@ -3,6 +3,7 @@ package web_server
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -26,11 +27,11 @@ var supportedFileTypes = map[string]struct{}{"text/html": {}, "text/plain": {}, 
 
 // stateless communication; handle requests not clients per se
 func requestHandler(connection *net.TCPConn, lock *sync.Mutex) {
-	//defer connection.Close()
+
 	timeoutError := connection.SetReadDeadline(time.Now().Add(time.Second * 60))
 	if timeoutError != nil {
 		log.Println("Error: request timed out")
-		CODE(400).respond(connection)
+		CODE(400).makeAndSendResponse(connection)
 
 		return
 	}
@@ -38,25 +39,25 @@ func requestHandler(connection *net.TCPConn, lock *sync.Mutex) {
 	// man har metoder man kan använda för att få åtkomst till requestens info
 	request, readRequestError := http.ReadRequest(bufio.NewReader(connection))
 	if readRequestError != nil {
-		CODE(500).respond(connection)
+		CODE(500).makeAndSendResponse(connection)
 	}
 
 	switch request.Method {
 	case "GET":
 		code, getResponse := handleGet(request, lock)
 		if code == http.StatusOK {
-			getResponse.respond(connection)
+			getResponse.makeAndSendResponse(connection)
 		} else {
-			code.respond(connection)
+			code.makeAndSendResponse(connection)
 		}
 
 	case "POST":
 		code := handlePOST(request, lock)
-		code.respond(connection)
+		code.makeAndSendResponse(connection)
 	case "PUT", "DELETE", "OPTIONS", "PATCH", "TRACE", "CONNECT":
-		CODE(500).respond(connection)
+		CODE(500).makeAndSendResponse(connection)
 	default:
-		CODE(400).respond(connection)
+		CODE(400).makeAndSendResponse(connection)
 	}
 }
 
@@ -112,17 +113,17 @@ func handleGet(request *http.Request, lock *sync.Mutex) (CODE, getResponse) {
 	}
 
 	path = path[1:]
-	fileInfo, statErr := os.Stat(path)
-	if statErr != nil {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
 		return CODE(400), getResponse{}
 	}
 
 	lock.Lock()
 	defer lock.Unlock()
 
-	fileInBytes, readError := os.ReadFile(path)
-	if readError != nil {
-		pl("openError")
+	fileInBytes, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Println(err)
 		return CODE(404), getResponse{}
 	}
 
@@ -130,7 +131,7 @@ func handleGet(request *http.Request, lock *sync.Mutex) (CODE, getResponse) {
 
 }
 
-func (gr getResponse) respond(connection net.Conn) {
+func (gr getResponse) makeAndSendResponse(connection net.Conn) {
 	response := &http.Response{
 		Status:     "200 OK",                                      // Setting the status text
 		StatusCode: http.StatusOK,                                 // Setting the status code
@@ -147,7 +148,7 @@ func (gr getResponse) respond(connection net.Conn) {
 	sendResponse(response, connection)
 }
 
-func (code CODE) respond(connection net.Conn) {
+func (code CODE) makeAndSendResponse(connection net.Conn) {
 	response := &http.Response{
 		Status:     http.StatusText(int(code)),
 		StatusCode: int(code),

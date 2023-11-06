@@ -13,77 +13,45 @@ type CODE int
 
 var pl = fmt.Println
 
-/*
-	func ProxyRequestHandler(connection net.Conn, lock *sync.Mutex) {
-		fmt.Println("-----")
-		request, readRequestError := http.ReadRequest(bufio.NewReader(connection))
-		if readRequestError != nil {
-			log.Fatal(readRequestError)
-		}
-		HandleProxyRequest(connection, request, lock)
-
-}
-*/
 func StartProxy() {
 
 	incomingConnectionListener := setupListener()
 	for {
 		incomingConnection, err := incomingConnectionListener.AcceptTCP()
 		if err != nil {
+			fmt.Println(err)
 			continue
 		}
 
-		//err = incomingConnection.SetKeepAlive(true)
-		if err != nil {
-			pl(err)
-		}
-
 		go func() {
-			HandleProxyRequest(incomingConnection)
+			handleProxyRequest(incomingConnection)
 		}()
 	}
 }
 
-func HandleProxyRequest(incomingConnection *net.TCPConn) {
+func handleProxyRequest(incomingConnection *net.TCPConn) {
 
 	request, readRequestError := http.ReadRequest(bufio.NewReader(incomingConnection))
 	if readRequestError != nil {
-		CODE(500).respond(incomingConnection)
+		CODE(500).makeAndSendResponse(incomingConnection)
 	} else if request.Method != "GET" {
-		CODE(501).respond(incomingConnection)
+		CODE(501).makeAndSendResponse(incomingConnection)
 	}
-	pl("request.Header: ", request.Header)
-	pl("request.Header: ", request.Header)
-	pl("request.Body: ", request.Body)
-
-	//pl("request.host", request.Host)
-	//pl("request.URL.Host", request.URL.Host)
-	//pl("request.URL.RequestURI()", request.URL.RequestURI())
-	//pl("request.URL.Port()", request.URL.Port()) //
-	//
-	//conn, err := net.Dial("tcp", "localhost:5431")
-	//if err != nil {
-	//	pl("Error in net.Dial: ", err)
-	//}
-	//pl("..........")
-	//pl("connected with regular dial hoohwooo", conn.RemoteAddr())
-	//pl("..........")
-	//conn.Close()
 
 	remoteAddress, err := net.ResolveTCPAddr("tcp", request.Host)
 	if err != nil {
-		pl("WE ARE HERE: ", err)
-		//	hantera
+		CODE(400).makeAndSendResponse(incomingConnection)
 	}
 
 	outgoingConnection, err := establishOutgoingConnection(5, remoteAddress)
 	if err != nil {
-		CODE(500).respond(incomingConnection)
+		CODE(500).makeAndSendResponse(incomingConnection)
 	}
 	defer func(outgoingConnection *net.TCPConn) {
 		err := outgoingConnection.Close()
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			return
 		}
 	}(outgoingConnection)
 
@@ -96,10 +64,11 @@ func HandleProxyRequest(incomingConnection *net.TCPConn) {
 
 	response, err := http.ReadResponse(bufio.NewReader(outgoingConnection), nil)
 	if err != nil {
-		//problem med att läsa in responsen
+		CODE(500).makeAndSendResponse(incomingConnection)
 	}
 
-	pl(response)
+	//TODO: Ta bort
+	fmt.Println("The response is", response, "with response", response.StatusCode)
 
 	sendResponse(response, incomingConnection)
 
@@ -124,7 +93,7 @@ func establishOutgoingConnection(nrOfAttempts int, remoteAddress *net.TCPAddr) (
 	return nil, err
 }
 
-func (code CODE) respond(clientConnection *net.TCPConn) {
+func (code CODE) makeAndSendResponse(clientConnection *net.TCPConn) {
 	response := &http.Response{
 		Status:     http.StatusText(int(code)),
 		StatusCode: int(code),
@@ -137,6 +106,7 @@ func (code CODE) respond(clientConnection *net.TCPConn) {
 }
 
 func sendResponse(response *http.Response, connection *net.TCPConn) {
+
 	// convert body to array of bytes so we can write it to client through connection
 	buf := bytes.Buffer{}
 	err := response.Write(&buf)
@@ -150,6 +120,7 @@ func sendResponse(response *http.Response, connection *net.TCPConn) {
 		pl("Error 2 is: ", err)
 	}
 }
+
 func sendRequest(request *http.Request, connection *net.TCPConn) {
 
 	// convert body to array of bytes so we can write it to client through connection
@@ -165,9 +136,10 @@ func sendRequest(request *http.Request, connection *net.TCPConn) {
 
 func setupListener() *net.TCPListener {
 	for {
+
 		// TODO: remove comments when not in testing
 		/*reader := bufio.NewReader(os.Stdin)
-		fmt.Println("Enter the port you want to listen to:")
+		fmt.Println("Enter the ip and port you want to listen to in the format  <ip>:<port>  below:")
 		// some ports on windows don't work depending on machine, e.g. 5433. We use 5431 instead.
 		address, err := reader.ReadString('\n')
 		if err != nil {

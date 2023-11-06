@@ -1,7 +1,7 @@
 package web_server
 
 import (
-	"HTTP_Server/test"
+	proxy_server "HTTP_Server/proxy-server"
 	"fmt"
 	"net"
 	"sync"
@@ -9,8 +9,8 @@ import (
 
 const maxClients = 10
 
-var pl = fmt.Println
 var lock sync.Mutex
+var testLock sync.Mutex
 
 // TODO: double check later if error handling is appropriate
 
@@ -34,7 +34,7 @@ func StartWebServer() {
 
 		tcpConnection, err := tcpListener.AcceptTCP()
 		if err != nil {
-			pl(err)
+			fmt.Println(err)
 			continue
 		}
 
@@ -72,7 +72,7 @@ func setupListener() *net.TCPListener {
 
 		tcpAddress, err := net.ResolveTCPAddr("tcp", address)
 		if err != nil {
-			pl(err)
+			fmt.Println(err)
 			continue
 		}
 
@@ -80,7 +80,7 @@ func setupListener() *net.TCPListener {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			pl("Now listening to Address:", address)
+			fmt.Println("Now listening to Address:", address)
 			return tcpListener
 		}
 	}

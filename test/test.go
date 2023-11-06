@@ -249,6 +249,7 @@ func testPostJpg() {
 
 func testPostJpeg() {
 	// Open the JPEG file from the testimages directory
+
 	file, err := os.Open("test/testimages/astronaut-with-pencil-pen-tool-created-clipping-path-included-jpeg-easy-composite.jpeg")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
