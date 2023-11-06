@@ -1,7 +1,6 @@
-package main
+package web_server
 
 import (
-	proxy_server "HTTP_Server/proxy-server"
 	"fmt"
 	"net"
 	"sync"
@@ -14,13 +13,12 @@ var testLock sync.Mutex
 
 // TODO: double check later if error handling is appropriate
 
-func main() {
+func StartWebServer() {
 	//TODO: comment out when not testing
 
 	// empty structure because value does not matter
 	requestChannel := make(chan struct{}, maxClients)
 	//go test.INITTEST(&testLock)
-	go proxy_server.ProxyMain()
 
 	// start listening to a port
 	tcpListener := setupListener()
