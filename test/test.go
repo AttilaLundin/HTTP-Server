@@ -26,26 +26,21 @@ func Test(testlock *sync.Mutex) {
 		go testPostCss(channel chan struct{})
 		go testPostJpg(channel chan struct{}) */
 
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
-	go testPostGif()
 	go testPostJpeg(testlock)
-
-	time.Sleep(time.Second * 3)
-
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
+	go testPostJpeg(testlock)
 	//cba making a channel, so we wait to make sure that the functions have executed
 	time.Sleep(time.Second * 2)
 }
@@ -295,11 +290,26 @@ func testPostJpeg(testlock *sync.Mutex) {
 		return
 	}
 
-	// Set the content type to the multipart form's content type
-	contentType := writer.FormDataContentType()
+	// Create a new HTTP POST request
+	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/image/jpeg", &requestBody)
+	if err != nil {
+		fmt.Println("Error creating HTTP request:", err)
+		return
+	}
 
-	// Perform the HTTP POST request
-	resp, err := http.Post("http://localhost:5431/web-server/storage/image/jpeg", contentType, &requestBody)
+	// Set the Content-Type header to the multipart form's content type
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	/*
+		We had a semi-random rare bug where occasionally a concurrent POST request would fail
+		with http: server closed idle connection
+		After extensive debugging and many hours, spanning days, we found out POST requests are by default
+		not retried when they fail due to some (internal) reason. To make our POST requests retry we must
+		set the Idempotency-Key header to "idempotency-key"
+	*/
+	req.Header.Set("Idempotency-Key", "idempotency-key")
+
+	// Send the HTTP request
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("Error sending HTTP request:", err)
 		return
@@ -355,7 +365,7 @@ func testPostGif() {
 
 	// Set the Content-Type header to the multipart form's content type
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Idempotency-Key", "idempotency-key")
 	// Send the HTTP request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	proxy_server "HTTP_Server/proxy-server"
+	"HTTP_Server/test"
 	"fmt"
 	"net"
 	"sync"
@@ -19,8 +19,8 @@ func main() {
 
 	// empty structure because value does not matter
 	requestChannel := make(chan struct{}, maxClients)
-	//go test.INITTEST(&testLock)
-	go proxy_server.ProxyMain()
+	go test.INITTEST(&testLock)
+	//go proxy_server.ProxyMain()
 
 	// start listening to a port
 	tcpListener := setupListener()
