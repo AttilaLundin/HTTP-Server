@@ -16,18 +16,19 @@ var lock sync.Mutex
 
 func main() {
 	//TODO: comment out when not testing
-	go test.INITTEST()
+
+	// empty structure because value does not matter
+	requestChannel := make(chan struct{}, maxClients)
+	//go test.INITTEST(&testLock)
+	go proxy_server.ProxyMain()
 
 	// start listening to a port
 	tcpListener := setupListener()
 
-	// empty structure because value does not matter
-	requestChannel := make(chan struct{}, MAX_CLIENTS)
-
 	for {
 
 		//create an empty anonymous struct, the value or content of the struct does not matter
-		requestChannel <- struct{}{} // will block if there is MAX_CLIENTS in the clientsPool
+		requestChannel <- struct{}{} // will block if there is maxClients in the clientsPool
 
 		tcpConnection, err := tcpListener.AcceptTCP()
 		if err != nil {
@@ -41,6 +42,7 @@ func main() {
 			<-requestChannel // removes an entry from clientsPool, allowing another to proceed
 			err := tcpConnection.Close()
 			if err != nil {
+				fmt.Println(err)
 				return
 			}
 		}()

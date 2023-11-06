@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -16,23 +17,40 @@ func INITTEST() {
 	Test()
 }
 
-func Test() {
+func Test(testlock *sync.Mutex) {
 
-	go testPostText()
+	/*
+		go testPostText(channel chan struct{})
+		go testPostGif(channel chan struct{})
+		go testPostHtml(channel chan struct{})
+		go testPostCss(channel chan struct{})
+		go testPostJpg(channel chan struct{}) */
+
 	go testPostGif()
-	go testPostHtml()
-	go testPostCss()
-	go testPostJpg()
-	go testPostJpeg()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostGif()
+	go testPostJpeg(testlock)
 
 	time.Sleep(time.Second * 3)
-	go testGetGif()
-	go testGetText()
+
 	//cba making a channel, so we wait to make sure that the functions have executed
 	time.Sleep(time.Second * 2)
 }
 
-func testPostText() {
+func testPostText(channel chan struct{}) {
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
 
@@ -80,7 +98,7 @@ func testPostText() {
 	fmt.Println("Plain file sent successfully, status code:", resp.Status)
 }
 
-func testPostHtml() {
+func testPostHtml(channel chan struct{}) {
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
 
@@ -131,7 +149,7 @@ func testPostHtml() {
 	fmt.Println("HTML file sent successfully, status code:", resp.Status)
 }
 
-func testPostCss() {
+func testPostCss(channel chan struct{}) {
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
 
@@ -182,7 +200,7 @@ func testPostCss() {
 	fmt.Println("CSS file sent successfully, status code:", resp.Status)
 }
 
-func testPostJpg() {
+func testPostJpg(channel chan struct{}) {
 	// Open the JPG file from the testimages directory
 	file, err := os.Open("test/testimages/Cat03.jpg")
 	if err != nil {
@@ -240,7 +258,7 @@ func testPostJpg() {
 	fmt.Println("JPG file sent successfully, status code:", resp.Status)
 }
 
-func testPostJpeg() {
+func testPostJpeg(testlock *sync.Mutex) {
 	// Open the JPEG file from the testimages directory
 	file, err := os.Open("test/testimages/astronaut-with-pencil-pen-tool-created-clipping-path-included-jpeg-easy-composite.jpeg")
 	if err != nil {
@@ -349,7 +367,7 @@ func testPostGif() {
 	fmt.Println("GIF file sent successfully, status code:", resp.Status)
 }
 
-func testGetGif() {
+func testGetGif(channel chan struct{}) {
 	// Define the URL to send the GET request to
 	url := "http://localhost:5431/web-server/storage/image/gif/skeleton.gif"
 
@@ -380,7 +398,7 @@ func testGetGif() {
 	fmt.Println("200!! GET GIF request and response validation successful")
 }
 
-func testGetText() {
+func testGetText(channel chan struct{}) {
 	// Define the URL to send the GET request to
 	url := "http://localhost:5431/web-server/storage/text/plain/testfile.txt"
 
