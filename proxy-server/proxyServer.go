@@ -13,7 +13,7 @@ type CODE int
 
 var pl = fmt.Println
 
-func StartProxy() {
+func StartProxyServer() {
 
 	incomingConnectionListener := setupListener()
 	for {

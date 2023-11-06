@@ -1,7 +1,6 @@
 package web_server
 
 import (
-	proxy_server "HTTP_Server/proxy-server"
 	"fmt"
 	"net"
 	"sync"
