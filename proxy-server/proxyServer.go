@@ -24,7 +24,7 @@ var pl = fmt.Println
 
 }
 */
-func ProxyMain() {
+func StartProxyServer() {
 
 	incomingConnectionListener := setupListener()
 	for {

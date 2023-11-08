@@ -13,10 +13,10 @@ import (
 
 func INITTEST() {
 	time.Sleep(time.Second * 3)
-	Test()
+	test()
 }
 
-func Test() {
+func test() {
 
 	go testPostText()
 	go testPostGif()
