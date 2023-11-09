@@ -8,31 +8,38 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"sync"
 	"time"
 )
 
 func INITTEST() {
 	time.Sleep(time.Second * 3)
 	test()
+	fmt.Println("All test Finished")
 }
 
 func test() {
 
 	for i := 0; i < 100; i++ {
 		go testPostText()
+		time.Sleep(time.Millisecond * 10)
 		go testPostGif()
+		time.Sleep(time.Millisecond * 10)
 		go testPostHtml()
+		time.Sleep(time.Millisecond * 10)
 		go testPostCss()
+		time.Sleep(time.Millisecond * 10)
 		go testPostJpg()
+		time.Sleep(time.Millisecond * 10)
 		go testPostJpeg()
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(time.Millisecond * 10)
 	}
 
 	for i := 0; i < 100; i++ {
 		go testGetGif()
 		go testGetText()
-		time.Sleep(time.Millisecond * 100)
+		go testGetGif()
+		go testGetText()
+		time.Sleep(time.Millisecond * 10)
 	}
 
 	//cba making a channel, so we wait to make sure that the functions have executed
@@ -368,8 +375,6 @@ func testGetGif() {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("Statuscode of the response:", resp.StatusCode)
-
 	// Check if the HTTP status code is 200 OK
 	if resp.StatusCode != http.StatusOK {
 		log.Fatal("Expected HTTP status code 200, got %d", resp.StatusCode)
@@ -418,5 +423,5 @@ func testGetText() {
 		log.Fatal("Expected response body to be %q, got %q", expectedContent, body)
 	}
 
-	fmt.Println("200!! GET request and response validation successful")
+	fmt.Println("200!! GET Plain request and response validation successful")
 }

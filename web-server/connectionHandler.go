@@ -9,7 +9,7 @@ import (
 const maxClients = 10
 
 var lock sync.Mutex
-
+var testLock sync.Mutex
 
 // TODO: double check later if error handling is appropriate
 
@@ -18,7 +18,6 @@ func StartWebServer() {
 
 	// empty structure because value does not matter
 	requestChannel := make(chan struct{}, maxClients)
-	//go test.INITTEST(&testLock)
 
 	// start listening to a port
 	tcpListener := setupListener()
