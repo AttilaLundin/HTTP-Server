@@ -1,4 +1,4 @@
-package main
+package web_server
 
 import (
 	"HTTP_Server/test"
@@ -7,14 +7,14 @@ import (
 	"sync"
 )
 
-const MAX_CLIENTS = 10
+const maxClients = 10
 
 var pl = fmt.Println
 var lock sync.Mutex
 
 // TODO: double check later if error handling is appropriate
 
-func main() {
+func StartWebServer() {
 	//TODO: comment out when not testing
 	go test.INITTEST()
 
@@ -22,12 +22,12 @@ func main() {
 	tcpListener := setupListener()
 
 	// empty structure because value does not matter
-	requestChannel := make(chan struct{}, MAX_CLIENTS)
+	requestChannel := make(chan struct{}, maxClients)
 
 	for {
 
 		//create an empty anonymous struct, the value or content of the struct does not matter
-		requestChannel <- struct{}{} // will block if there is MAX_CLIENTS in the clientsPool
+		requestChannel <- struct{}{} // will block if there is maxClients in the clientsPool
 
 		tcpConnection, err := tcpListener.AcceptTCP()
 		if err != nil {

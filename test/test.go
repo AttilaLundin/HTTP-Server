@@ -13,21 +13,27 @@ import (
 
 func INITTEST() {
 	time.Sleep(time.Second * 3)
-	Test()
+	test()
 }
 
-func Test() {
+func test() {
 
-	go testPostText()
-	go testPostGif()
-	go testPostHtml()
-	go testPostCss()
-	go testPostJpg()
-	go testPostJpeg()
+	for i := 0; i < 100; i++ {
+		go testPostText()
+		go testPostGif()
+		go testPostHtml()
+		go testPostCss()
+		go testPostJpg()
+		go testPostJpeg()
+		time.Sleep(time.Millisecond * 100)
+	}
 
-	time.Sleep(time.Second * 3)
-	go testGetGif()
-	go testGetText()
+	for i := 0; i < 100; i++ {
+		go testGetGif()
+		go testGetText()
+		time.Sleep(time.Millisecond * 100)
+	}
+
 	//cba making a channel, so we wait to make sure that the functions have executed
 	time.Sleep(time.Second * 2)
 }
