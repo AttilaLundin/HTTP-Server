@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -158,37 +159,31 @@ func sendRequest(request *http.Request, connection *net.TCPConn) {
 }
 
 func setupListener() *net.TCPListener {
-	for {
-		// TODO: remove comments when not in testing
-		/*reader := bufio.NewReader(os.Stdin)
-		fmt.Println("Enter the port you want to listen to:")
-		// some ports on windows don't work depending on machine, e.g. 5433. We use 5431 instead.
-		address, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println(err)
-			// restart loop until successful
-			continue
-		}
 
-		// remove delimiter /n or bugs
-		address = address[:len(address)-2]
-		*/
-		address := "localhost:5430" /*+ address*/
-
-		tcpAddress, err := net.ResolveTCPAddr("tcp", address)
-		if err != nil {
-			pl(err)
-			continue
-		}
-
-		tcpListener, err := net.ListenTCP("tcp", tcpAddress)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			pl("Proxy Server now listening to Address:", address)
-			return tcpListener
-		}
+	ip := os.Getenv("IP")
+	if ip == "" {
+		log.Fatal("Can't start proxy without a valid ip number")
 	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("Can't start proxy without a valid port number")
+	}
+
+	address := ip + ":" + port
+
+	tcpAddress, err := net.ResolveTCPAddr("tcp", address)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tcpListener, err := net.ListenTCP("tcp", tcpAddress)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pl("Proxy Server now listening to Address:", address)
+	return tcpListener
+
 }
 
 //<3 in memory of daString <3
