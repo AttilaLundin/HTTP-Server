@@ -73,9 +73,6 @@ func handleProxyRequest(incomingConnection *net.TCPConn) {
 	if err != nil {
 		code(500).makeAndSendResponse(incomingConnection)
 	}
-
-	//TODO: Ta bort
-	fmt.Println("The response is", response, "with response", response.StatusCode)
 	//Send the response back to the client
 	sendResponse(response, incomingConnection)
 
@@ -90,9 +87,8 @@ func establishOutgoingConnection(nrOfAttempts int, remoteAddress *net.TCPAddr) (
 	for i := 0; i < nrOfAttempts; i++ {
 		outgoingConnection, err := net.DialTCP("tcp", nil, remoteAddress)
 		if err != nil {
-			pl(remoteAddress)
-			pl(err)
-			pl("Proxy server failed to connect to web server... attempt #: ", attempt)
+			fmt.Println(err)
+			fmt.Println("Proxy server failed to connect to web server... attempt #: ", attempt)
 			attempt++
 			time.Sleep(time.Second)
 			continue
@@ -126,8 +122,7 @@ func sendResponse(response *http.Response, connection *net.TCPConn) {
 	//write the bytes to the client connection
 	_, err = connection.Write(buf.Bytes())
 	if err != nil {
-		pl("THE CONNECTION IN SENDREQUEST IS: ", connection)
-		pl("Error 2 is: ", err)
+		fmt.Println("sendResponse error: ", err)
 	}
 }
 
@@ -141,7 +136,7 @@ func sendRequest(request *http.Request, connection *net.TCPConn) {
 	//write the bytes to server connection
 	if _, err := connection.Write(buf.Bytes()); err != nil {
 		//pl("Conn is: ", connection)
-		pl("Error 2 is: ", err)
+		fmt.Println("sendRequest error: ", err)
 	}
 }
 

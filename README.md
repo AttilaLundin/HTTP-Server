@@ -1,3 +1,34 @@
+# **HTTP Web Server and Proxy Server**
+
+In order to start both the HTTP and Proxy server you need to run main. 
+You will be prompted to enter the ip address and port for the web server and proxy server.
+We have lazily implemented it so that both are started by goroutines immediately after each other: 
+sometimes you are prompted for the web server first and sometimes for the proxy server first, 
+the prompt that appears first is the one that will also read your input first! 
+We generally use port 5431 for the web server and port 5430 for the proxy server.
+However, in the cloud we have containerized the web server and proxy server separately using Docker so that they run in separate instances.
+
+
+
+
+### **Testing**
+There are some tests that you can start by uncommenting the following line in row 26 in the connectionhandler:
+
+`//go test.INITTEST()`
+
+It is important that you have the correct repository structure if you wish to use these tests(!) 
+
+Within the webserver folder there must be a subfolder  
+
+    HTTP-Server/web-server/storage
+
+
+
+
+
+
+
+
 # **The Basics (10 points)**
 
 Your task is to build a web sever capable of accepting HTTP requests and returning response data from locally stored files to a client. The server will be implemented in Go and MUST handle concurrent requests by creating a Go routine for each new client request. You will only be responsible for implementing the GET and POST methods. All other request methods received by the server should elicit a "Not Implemented" (501) error (see RFC 1945Links to an external site. section 9.5 - Server Error).
