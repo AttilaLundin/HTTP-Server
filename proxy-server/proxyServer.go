@@ -115,7 +115,7 @@ func (code CODE) makeAndSendResponse(clientConnection *net.TCPConn) {
 
 func sendResponse(response *http.Response, connection *net.TCPConn) {
 
-	// convert body to array of bytes so we can write it to client through connection
+	// convert body to array of bytes so that we can write it to client through connection
 	buf := bytes.Buffer{}
 	err := response.Write(&buf)
 	if err != nil {
@@ -131,7 +131,7 @@ func sendResponse(response *http.Response, connection *net.TCPConn) {
 
 func sendRequest(request *http.Request, connection *net.TCPConn) {
 
-	// convert body to array of bytes so we can write it to client through connection
+	// convert body to array of bytes so that we can write it to client through connection
 	buf := bytes.Buffer{}
 	if err := request.Write(&buf); err != nil {
 		pl("Error 1 is: ", err)
@@ -172,7 +172,7 @@ func setupListener() *net.TCPListener {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			pl("Proxy Server now listening to Address:", address)
+			pl("Proxy Server now listening to address:", address)
 			return tcpListener
 		}
 	}

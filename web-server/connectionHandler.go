@@ -71,6 +71,7 @@ func setupListener() *net.TCPListener {
 			continue
 		}
 
+		// listen to retrieved address from tcp conn
 		tcpListener, err := net.ListenTCP("tcp", tcpAddress)
 		if err != nil {
 			fmt.Println(err)

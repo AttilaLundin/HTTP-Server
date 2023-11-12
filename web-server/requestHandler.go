@@ -73,20 +73,23 @@ func handlePOST(request *http.Request, lock *sync.Mutex) CODE {
 	}
 	defer file.Close()
 
-	//contentType := request.Header.Get("Content-Type")
+	// read and store request body
 	reqBody, err := io.ReadAll(request.Body)
 	if err != nil {
 		return CODE(500)
 	}
 
-	// slice away everything after the ; so we simply get e.g. text/plain or text/css without "; utf-8" then trim spaces
 	contentType := http.DetectContentType(reqBody)
+
+	// slice away everything after the ; so we simply get e.g. text/plain or text/css without "; utf-8"
+	// then trim spaces for safe measure
 	contentType = strings.TrimSpace(strings.Split(contentType, ";")[0])
 
 	if _, ok := supportedFileTypes[contentType]; !ok || contentType == "application/octet-stream" {
 		return CODE(408)
 	}
 
+	// lock to avoid interleaving when creating and copying to storage, shared data is being manipulated
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -131,6 +134,7 @@ func handleGet(request *http.Request, lock *sync.Mutex) (CODE, getResponse) {
 
 }
 
+// for successful GET response
 func (gr getResponse) makeAndSendResponse(connection net.Conn) {
 	response := &http.Response{
 		Status:     "200 OK",                                      // Setting the status text
@@ -143,6 +147,7 @@ func (gr getResponse) makeAndSendResponse(connection net.Conn) {
 	}
 	response.Header.Set("Content-Type", http.DetectContentType(gr.fileInBytes))
 	response.Header.Set("Connection", "Closed")
+	// convert integer to decimal string representation
 	response.Header.Set("Content-Length", strconv.Itoa(int(gr.fileInfo.Size())))
 	response.Header.Set("Last-Modified", gr.fileInfo.ModTime().String())
 	sendResponse(response, connection)
@@ -162,7 +167,7 @@ func (code CODE) makeAndSendResponse(connection net.Conn) {
 }
 
 func sendResponse(response *http.Response, connection net.Conn) {
-	// convert body to array of bytes so we can write it to client through connection
+	// convert body to array of bytes so that we can write it to client through connection
 	buf := bytes.Buffer{}
 	if err := response.Write(&buf); err != nil {
 		panic(err)

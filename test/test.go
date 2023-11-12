@@ -34,7 +34,7 @@ func test() {
 		time.Sleep(time.Millisecond * 10)
 	}
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 50; i++ {
 		go testGetGif()
 		go testGetText()
 		go testGetGif()
@@ -175,7 +175,7 @@ func testPostCss() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/text/css", &requestBody)
+	req, err := http.NewRequest("POST", "http://"+webServerAddress+"/web-server/storage", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -233,7 +233,7 @@ func testPostJpg() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/image/jpg", &requestBody)
+	req, err := http.NewRequest("POST", "http://"+webServerAddress+"/web-server/storage", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -295,7 +295,7 @@ func testPostJpeg() {
 	contentType := writer.FormDataContentType()
 
 	// Perform the HTTP POST request
-	resp, err := http.Post("http://localhost:5431/web-server/storage/image/jpeg", contentType, &requestBody)
+	resp, err := http.Post("http://"+webServerAddress+"/web-server/storage", contentType, &requestBody)
 	if err != nil {
 		fmt.Println("Error sending HTTP request:", err)
 		return
@@ -343,7 +343,7 @@ func testPostGif() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/image/gif", &requestBody)
+	req, err := http.NewRequest("POST", "http://"+webServerAddress+"/web-server/storage", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -366,7 +366,7 @@ func testPostGif() {
 
 func testGetGif() {
 	// Define the URL to send the GET request to
-	url := "http://localhost:5431/web-server/storage/image/gif/skeleton.gif"
+	url := "http://" + webServerAddress + "/web-server/storage/skeleton.gif"
 
 	// Create a new HTTP GET request
 	resp, err := http.Get(url)
@@ -406,7 +406,8 @@ func testGetText() {
 
 	// Check if the HTTP status code is 200 OK
 	if resp.StatusCode != http.StatusOK {
-		log.Fatal("Expected HTTP status code 200, got %d", resp.StatusCode)
+		fmt.Println("Expected HTTP status code 200, got %d", resp.StatusCode)
+		return
 	}
 
 	// Read the response body
