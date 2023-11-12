@@ -451,7 +451,11 @@ func testGetJpg() {
 		fmt.Println(creationError)
 		return
 	}
-	io.Copy(emptyFile, bytes.NewReader(body))
+	_, err = io.Copy(emptyFile, bytes.NewReader(body))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	fmt.Println("200!! GET GIF request and response validation successful")
 }
 func testGetJpeg() {
@@ -464,7 +468,12 @@ func testGetJpeg() {
 		fmt.Println("Error sending HTTP GET request: %v", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Check if the HTTP status code is 200 OK
 	if resp.StatusCode != http.StatusOK {
@@ -483,7 +492,11 @@ func testGetJpeg() {
 	if creationError != nil {
 		log.Fatal(creationError)
 	}
-	io.Copy(emptyFile, bytes.NewReader(body))
+	_, err = io.Copy(emptyFile, bytes.NewReader(body))
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 	fmt.Println("200!! GET GIF request and response validation successful")
 }
 
@@ -497,7 +510,12 @@ func testGetText() {
 		fmt.Println("Error sending HTTP GET request: %v", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Check if the HTTP status code is 200 OK
 	if resp.StatusCode != http.StatusOK {
