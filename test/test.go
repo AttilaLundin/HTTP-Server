@@ -108,7 +108,12 @@ func testPostText() {
 		fmt.Println("Error sending HTTP request:", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 	fmt.Println("Plain file sent successfully, status code:", resp.Status)
 }
 
@@ -157,7 +162,12 @@ func testPostHtml() {
 		fmt.Println("Error sending HTTP request:", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Here you might want to check the response status, handle the response, etc.
 	fmt.Println("HTML file sent successfully, status code:", resp.Status)
@@ -208,7 +218,12 @@ func testPostCss() {
 		fmt.Println("Error sending HTTP request:", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Here you might want to check the response status, handle the response, etc.
 	fmt.Println("CSS file sent successfully, status code:", resp.Status)
@@ -271,7 +286,12 @@ func testPostJpg() {
 		fmt.Println("Error sending HTTP request:", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Here you might want to check the response status, handle the response, etc.
 	fmt.Println("JPG file sent successfully, status code:", resp.Status)
@@ -285,7 +305,12 @@ func testPostJpeg() {
 		fmt.Println("Error opening file:", err)
 		return
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
 
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
@@ -323,7 +348,12 @@ func testPostJpeg() {
 		fmt.Println("Error sending HTTP request:", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Here you might want to check the response status, handle the response, etc.
 	fmt.Println("JPEG file sent successfully, status code:", resp.Status)
@@ -336,7 +366,12 @@ func testPostGif() {
 		fmt.Println("Error opening file:", err)
 		return
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(file)
 
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
@@ -381,7 +416,12 @@ func testPostGif() {
 		fmt.Println("Error sending HTTP request:", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Here you might want to check the response status, handle the response, etc.
 	fmt.Println("GIF file sent successfully, status code:", resp.Status)
@@ -397,7 +437,12 @@ func testGetGif() {
 		fmt.Println("Error sending HTTP GET request: %v", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Check if the HTTP status code is 200 OK
 	if resp.StatusCode != http.StatusOK {
@@ -417,7 +462,11 @@ func testGetGif() {
 		fmt.Println(creationError)
 		return
 	}
-	io.Copy(emptyFile, bytes.NewReader(body))
+	_, err = io.Copy(emptyFile, bytes.NewReader(body))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	fmt.Println("200!! GET GIF request and response validation successful")
 }
 
@@ -431,7 +480,12 @@ func testGetJpg() {
 		fmt.Println("Error sending HTTP GET request: %v", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Check if the HTTP status code is 200 OK
 	if resp.StatusCode != http.StatusOK {
@@ -544,7 +598,11 @@ func testGetText() {
 		fmt.Println(creationError)
 		return
 	}
-	io.Copy(emptyFile, bytes.NewReader(body))
+	_, err = io.Copy(emptyFile, bytes.NewReader(body))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	fmt.Println("200!! GET Plain request and response validation successful")
 }
 
@@ -558,7 +616,12 @@ func testGetHtml() {
 		fmt.Println("Error sending HTTP GET request: %v", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Check if the HTTP status code is 200 OK
 	if resp.StatusCode != http.StatusOK {
@@ -578,7 +641,11 @@ func testGetHtml() {
 		fmt.Println(creationError)
 		return
 	}
-	io.Copy(emptyFile, bytes.NewReader(body))
+	_, err = io.Copy(emptyFile, bytes.NewReader(body))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	fmt.Println("200!! GET Plain request and response validation successful")
 }
 
@@ -592,7 +659,12 @@ func testGetCss() {
 		fmt.Println("Error sending HTTP GET request: %v", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 
 	// Check if the HTTP status code is 200 OK
 	if resp.StatusCode != http.StatusOK {
@@ -612,6 +684,10 @@ func testGetCss() {
 		fmt.Println(creationError)
 		return
 	}
-	io.Copy(emptyFile, bytes.NewReader(body))
+	_, err = io.Copy(emptyFile, bytes.NewReader(body))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	fmt.Println("200!! GET Plain request and response validation successful")
 }
