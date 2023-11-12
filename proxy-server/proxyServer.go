@@ -9,14 +9,16 @@ import (
 	"time"
 )
 
-type CODE int
+// Represents the http status
+type code int
 
 var pl = fmt.Println
 
 func StartProxyServer() {
-
+	// listener for incoming connection
 	incomingConnectionListener := setupListener()
 	for {
+		// accept incoming TCP connections
 		incomingConnection, err := incomingConnectionListener.AcceptTCP()
 		if err != nil {
 			fmt.Println(err)
@@ -24,29 +26,33 @@ func StartProxyServer() {
 		}
 
 		go func() {
+			// function for handle incoming TCP connection in a separate goroutine
 			handleProxyRequest(incomingConnection)
 		}()
 	}
 }
 
 func handleProxyRequest(incomingConnection *net.TCPConn) {
-
+	// read incoming http request
 	request, readRequestError := http.ReadRequest(bufio.NewReader(incomingConnection))
 	if readRequestError != nil {
-		CODE(500).makeAndSendResponse(incomingConnection)
+		//if error send response code 500
+		code(500).makeAndSendResponse(incomingConnection)
 	} else if request.Method != "GET" {
-		CODE(501).makeAndSendResponse(incomingConnection)
+		// if request is not get then send response 501
+		code(501).makeAndSendResponse(incomingConnection)
 	}
-
+	// retrieve IP address from the request host
 	remoteAddress, err := net.ResolveTCPAddr("tcp", request.Host)
 	if err != nil {
 		CODE(400).makeAndSendResponse(incomingConnection)
 	}
-
+	// establish an outgoing connection with the remote address
 	outgoingConnection, err := establishOutgoingConnection(5, remoteAddress)
 	if err != nil {
 		CODE(500).makeAndSendResponse(incomingConnection)
 	}
+
 	defer func(outgoingConnection *net.TCPConn) {
 		err := outgoingConnection.Close()
 		if err != nil {
@@ -54,14 +60,14 @@ func handleProxyRequest(incomingConnection *net.TCPConn) {
 			return
 		}
 	}(outgoingConnection)
-
+	// wend the request to the server
 	sendRequest(request, outgoingConnection)
-
+	// set timeout for reading the response
 	err = outgoingConnection.SetReadDeadline(time.Now().Add(time.Second * 5))
 	if err != nil {
 		panic(err)
 	}
-
+	// read response from server
 	response, err := http.ReadResponse(bufio.NewReader(outgoingConnection), nil)
 	if err != nil {
 		CODE(500).makeAndSendResponse(incomingConnection)
@@ -69,11 +75,13 @@ func handleProxyRequest(incomingConnection *net.TCPConn) {
 
 	//TODO: Ta bort
 	fmt.Println("The response is", response, "with response", response.StatusCode)
-
+	//Send the response back to the client
 	sendResponse(response, incomingConnection)
 
 }
 
+// attempts to establish connection to the server by retrying if it fails
+// although in our program, practically, if it fails first time it will likely fail on reattempts
 func establishOutgoingConnection(nrOfAttempts int, remoteAddress *net.TCPAddr) (*net.TCPConn, error) {
 	var err error = nil
 	attempt := 1
@@ -113,7 +121,7 @@ func sendResponse(response *http.Response, connection *net.TCPConn) {
 	if err != nil {
 		pl("Error 1 is: ", err)
 	}
-
+	//write the bytes to the client connection
 	_, err = connection.Write(buf.Bytes())
 	if err != nil {
 		pl("THE CONNECTION IN SENDREQUEST IS: ", connection)
@@ -128,6 +136,7 @@ func sendRequest(request *http.Request, connection *net.TCPConn) {
 	if err := request.Write(&buf); err != nil {
 		pl("Error 1 is: ", err)
 	}
+	//write the bytes to server connection
 	if _, err := connection.Write(buf.Bytes()); err != nil {
 		//pl("Conn is: ", connection)
 		pl("Error 2 is: ", err)
