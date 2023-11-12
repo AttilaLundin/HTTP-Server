@@ -2,7 +2,6 @@ package main
 
 import (
 	proxy_server "HTTP_Server/proxy-server"
-	"HTTP_Server/test"
 	web_server "HTTP_Server/web-server"
 	"os"
 	"os/signal"
@@ -15,8 +14,6 @@ func main() {
 	go web_server.StartWebServer()
 	go proxy_server.StartProxyServer()
 
-	time.Sleep(time.Second * 10)
-	go test.INITTEST()
 	// we create a channel to wait for an interrupt signal
 	quit := make(chan os.Signal, 1)
 

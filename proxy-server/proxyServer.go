@@ -13,8 +13,6 @@ import (
 // Represents the http status
 type code int
 
-var pl = fmt.Println
-
 func StartProxyServer() {
 	// listener for incoming connection
 	incomingConnectionListener := setupListener()
@@ -117,7 +115,8 @@ func sendResponse(response *http.Response, connection *net.TCPConn) {
 	buf := bytes.Buffer{}
 	err := response.Write(&buf)
 	if err != nil {
-		pl("Error 1 is: ", err)
+		fmt.Println(err)
+		return
 	}
 	//write the bytes to the client connection
 	_, err = connection.Write(buf.Bytes())
@@ -131,7 +130,7 @@ func sendRequest(request *http.Request, connection *net.TCPConn) {
 	// convert body to array of bytes so that we can write it to client through connection
 	buf := bytes.Buffer{}
 	if err := request.Write(&buf); err != nil {
-		pl("Error 1 is: ", err)
+		fmt.Println("Error 1 is: ", err)
 	}
 	//write the bytes to server connection
 	if _, err := connection.Write(buf.Bytes()); err != nil {
@@ -160,7 +159,7 @@ func setupListener() *net.TCPListener {
 		// retrieve address from an existing tcp connection
 		tcpAddress, err := net.ResolveTCPAddr("tcp", address)
 		if err != nil {
-			pl(err)
+			fmt.Println(err)
 			continue
 		}
 		// listen to retrieved address from tcp conn
@@ -168,7 +167,7 @@ func setupListener() *net.TCPListener {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			pl("Proxy Server now listening to address:", address)
+			fmt.Println("Proxy Server now listening to address:", address)
 			return tcpListener
 		}
 	}
