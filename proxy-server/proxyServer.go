@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -45,12 +46,12 @@ func handleProxyRequest(incomingConnection *net.TCPConn) {
 	// retrieve IP address from the request host
 	remoteAddress, err := net.ResolveTCPAddr("tcp", request.Host)
 	if err != nil {
-		CODE(400).makeAndSendResponse(incomingConnection)
+		code(400).makeAndSendResponse(incomingConnection)
 	}
 	// establish an outgoing connection with the remote address
 	outgoingConnection, err := establishOutgoingConnection(5, remoteAddress)
 	if err != nil {
-		CODE(500).makeAndSendResponse(incomingConnection)
+		code(500).makeAndSendResponse(incomingConnection)
 	}
 
 	defer func(outgoingConnection *net.TCPConn) {
@@ -70,7 +71,7 @@ func handleProxyRequest(incomingConnection *net.TCPConn) {
 	// read response from server
 	response, err := http.ReadResponse(bufio.NewReader(outgoingConnection), nil)
 	if err != nil {
-		CODE(500).makeAndSendResponse(incomingConnection)
+		code(500).makeAndSendResponse(incomingConnection)
 	}
 
 	//TODO: Ta bort
@@ -101,7 +102,8 @@ func establishOutgoingConnection(nrOfAttempts int, remoteAddress *net.TCPAddr) (
 	return nil, err
 }
 
-func (code CODE) makeAndSendResponse(clientConnection *net.TCPConn) {
+// creates a http response based on the code and sends it to the client connection
+func (code code) makeAndSendResponse(clientConnection *net.TCPConn) {
 	response := &http.Response{
 		Status:     http.StatusText(int(code)),
 		StatusCode: int(code),
@@ -145,10 +147,10 @@ func sendRequest(request *http.Request, connection *net.TCPConn) {
 
 func setupListener() *net.TCPListener {
 	for {
+		// init a reader
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Println("Enter the ip and port you want the proxy to listen to in the format  <ip>:<port>  below:\n")
 
-		// TODO: remove comments when not in testing
-		/*reader := bufio.NewReader(os.Stdin)
-		fmt.Println("Enter the ip and port you want to listen to in the format  <ip>:<port>  below:")
 		// some ports on windows don't work depending on machine, e.g. 5433. We use 5431 instead.
 		address, err := reader.ReadString('\n')
 		if err != nil {
@@ -159,15 +161,14 @@ func setupListener() *net.TCPListener {
 
 		// remove delimiter /n or bugs
 		address = address[:len(address)-2]
-		*/
-		address := "localhost:5430" /*+ address*/
 
+		// retrieve address from an existing tcp connection
 		tcpAddress, err := net.ResolveTCPAddr("tcp", address)
 		if err != nil {
 			pl(err)
 			continue
 		}
-
+		// listen to retrieved address from tcp conn
 		tcpListener, err := net.ListenTCP("tcp", tcpAddress)
 		if err != nil {
 			fmt.Println(err)

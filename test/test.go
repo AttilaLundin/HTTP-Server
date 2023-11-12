@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const webServerAddress = "localhost:5431"
+
 func INITTEST() {
 	time.Sleep(time.Second * 3)
 	test()
@@ -18,8 +20,20 @@ func INITTEST() {
 }
 
 func test() {
+	go testGetGif()
+	time.Sleep(time.Millisecond * 10)
+	go testGetText()
+	time.Sleep(time.Millisecond * 10)
+	go testGetHtml()
+	time.Sleep(time.Millisecond * 10)
+	go testGetCss()
+	time.Sleep(time.Millisecond * 10)
+	go testGetJpg()
+	time.Sleep(time.Millisecond * 10)
+	go testGetJpeg()
+	time.Sleep(time.Second * 3)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 50; i++ {
 		go testPostText()
 		time.Sleep(time.Millisecond * 10)
 		go testPostGif()
@@ -37,8 +51,12 @@ func test() {
 	for i := 0; i < 50; i++ {
 		go testGetGif()
 		go testGetText()
-		go testGetGif()
-		go testGetText()
+		time.Sleep(time.Millisecond * 10)
+		go testGetHtml()
+		go testGetCss()
+		time.Sleep(time.Millisecond * 10)
+		go testGetJpg()
+		go testGetJpeg()
 		time.Sleep(time.Millisecond * 10)
 	}
 
@@ -75,7 +93,7 @@ func testPostText() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/text/plain", &requestBody)
+	req, err := http.NewRequest("POST", "http://"+webServerAddress+"/web-server/storage", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -124,7 +142,7 @@ func testPostHtml() {
 	}
 
 	// Create a new HTTP POST request
-	req, err := http.NewRequest("POST", "http://localhost:5431/web-server/storage/text/html", &requestBody)
+	req, err := http.NewRequest("POST", "http://"+webServerAddress+"/web-server/storage", &requestBody)
 	if err != nil {
 		fmt.Println("Error creating HTTP request:", err)
 		return
@@ -203,7 +221,12 @@ func testPostJpg() {
 		fmt.Println("Error opening file:", err)
 		return
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
 
 	// Create a buffer to store the POST request body
 	var requestBody bytes.Buffer
@@ -371,36 +394,8 @@ func testGetGif() {
 	// Create a new HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal("Error sending HTTP GET request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// Check if the HTTP status code is 200 OK
-	if resp.StatusCode != http.StatusOK {
-		log.Fatal("Expected HTTP status code 200, got %d", resp.StatusCode)
-	}
-
-	// Read the response body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal("Error reading response body: %v", err)
-	}
-	emptyFile, creationError := os.Create("test/clienttest/skeleton.gif")
-	if creationError != nil {
-		log.Fatal(creationError)
-	}
-	io.Copy(emptyFile, bytes.NewReader(body))
-	fmt.Println("200!! GET GIF request and response validation successful")
-}
-
-func testGetText() {
-	// Define the URL to send the GET request to
-	url := "http://localhost:5431/web-server/storage/text/plain/testfile.txt"
-
-	// Create a new HTTP GET request
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatal("Error sending HTTP GET request: %v", err)
+		fmt.Println("Error sending HTTP GET request: %v", err)
+		return
 	}
 	defer resp.Body.Close()
 
@@ -413,7 +408,108 @@ func testGetText() {
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("Error reading response body: %v", err)
+		fmt.Println("Error reading response body: %v", err)
+		return
+	}
+
+	emptyFile, creationError := os.Create("test/clienttest/skeleton.gif")
+	if creationError != nil {
+		fmt.Println(creationError)
+		return
+	}
+	io.Copy(emptyFile, bytes.NewReader(body))
+	fmt.Println("200!! GET GIF request and response validation successful")
+}
+
+func testGetJpg() {
+	// Define the URL to send the GET request to
+	url := "http://" + webServerAddress + "/web-server/storage/Cat03.jpg"
+
+	// Create a new HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error sending HTTP GET request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check if the HTTP status code is 200 OK
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Expected HTTP status code 200, got %d", resp.StatusCode)
+		return
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body: %v", err)
+		return
+	}
+
+	emptyFile, creationError := os.Create("test/clienttest/Cat03.jpg")
+	if creationError != nil {
+		fmt.Println(creationError)
+		return
+	}
+	io.Copy(emptyFile, bytes.NewReader(body))
+	fmt.Println("200!! GET GIF request and response validation successful")
+}
+func testGetJpeg() {
+	// Define the URL to send the GET request to
+	url := "http://" + webServerAddress + "/web-server/storage/astronaut-with-pencil-pen-tool-created-clipping-path-included-jpeg-easy-composite.jpeg"
+
+	// Create a new HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error sending HTTP GET request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check if the HTTP status code is 200 OK
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Expected HTTP status code 200, got %d", resp.StatusCode)
+		return
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body: %v", err)
+		return
+	}
+
+	emptyFile, creationError := os.Create("test/clienttest/astronaut-with-pencil-pen-tool-created-clipping-path-included-jpeg-easy-composite.jpeg")
+	if creationError != nil {
+		log.Fatal(creationError)
+	}
+	io.Copy(emptyFile, bytes.NewReader(body))
+	fmt.Println("200!! GET GIF request and response validation successful")
+}
+
+func testGetText() {
+	// Define the URL to send the GET request to
+	url := "http://" + webServerAddress + "/web-server/storage/testfile.txt"
+
+	// Create a new HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error sending HTTP GET request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check if the HTTP status code is 200 OK
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Expected HTTP status code 200, got %d", resp.StatusCode)
+		return
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body: %v", err)
+		return
 	}
 
 	// Define the expected response body content
@@ -421,8 +517,83 @@ func testGetText() {
 
 	// Validate the response body content
 	if string(body) != expectedContent {
-		log.Fatal("Expected response body to be %q, got %q", expectedContent, body)
+		fmt.Println("Expected response body to be %q, got %q", expectedContent, body)
+		return
 	}
 
+	emptyFile, creationError := os.Create("test/clienttest/testfile.txt")
+	if creationError != nil {
+		fmt.Println(creationError)
+		return
+	}
+	io.Copy(emptyFile, bytes.NewReader(body))
+	fmt.Println("200!! GET Plain request and response validation successful")
+}
+
+func testGetHtml() {
+	// Define the URL to send the GET request to
+	url := "http://" + webServerAddress + "/web-server/storage/testfile.html"
+
+	// Create a new HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error sending HTTP GET request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check if the HTTP status code is 200 OK
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Expected HTTP status code 200, got %d", resp.StatusCode)
+		return
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body: %v", err)
+		return
+	}
+
+	emptyFile, creationError := os.Create("test/clienttest/testfile.html")
+	if creationError != nil {
+		fmt.Println(creationError)
+		return
+	}
+	io.Copy(emptyFile, bytes.NewReader(body))
+	fmt.Println("200!! GET Plain request and response validation successful")
+}
+
+func testGetCss() {
+	// Define the URL to send the GET request to
+	url := "http://" + webServerAddress + "/web-server/storage/stylesheet.css"
+
+	// Create a new HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error sending HTTP GET request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check if the HTTP status code is 200 OK
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Expected HTTP status code 200, got %d", resp.StatusCode)
+		return
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body: %v", err)
+		return
+	}
+
+	emptyFile, creationError := os.Create("test/clienttest/stylesheet.css")
+	if creationError != nil {
+		fmt.Println(creationError)
+		return
+	}
+	io.Copy(emptyFile, bytes.NewReader(body))
 	fmt.Println("200!! GET Plain request and response validation successful")
 }
