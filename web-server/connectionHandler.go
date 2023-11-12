@@ -24,6 +24,9 @@ func StartWebServer() {
 	// start listening to a port
 	tcpListener := setupListener()
 
+	//TODO: Comment out if you want to run test
+	//go test.INITTEST()
+
 	// this is the main loop of the web server, handling each connection.
 	for {
 
