@@ -16,15 +16,24 @@ There are some tests that you can start by uncommenting the following line in ro
 
 `//go test.INITTEST()`
 
-It is important that you have the correct repository structure if you wish to use these tests(!) 
+It is important that you have the correct repository structure if you wish to use these tests or properly GET/POST in general(!)
 
 Within the webserver folder there must be a subfolder  
 
     HTTP-Server/web-server/storage
 
+## **The Cloud and Docker**
 
+We have moved our solution for the web server and proxy server to the cloud using the student granted AWS accounts. 
+We containerized our web server and proxy server using Docker and uploaded them to a public repo in Dockerhub.
+From our cloud server, we pulled the two containers and can now run them separately on the cloud with communication being possible between the
+web server and proxy server.
+#### **NOTE that the containers each expose port 5431**
 
+* Dockerhub web server: https://hub.docker.com/r/attilalundin/web-server
+* Dockerhub proxy server: https://hub.docker.com/r/attilalundin/proxy-server
 
+**To run the code in the cloud using Docker, first pull the web server and proxy server from the cloud server using these two commands:**
 
 
 
