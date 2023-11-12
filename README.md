@@ -11,8 +11,8 @@ However, in the cloud we have containerized the web server and proxy server sepa
 
 
 
-### **Testing**
-There are some tests that you can start by uncommenting the following line in row 26 in the connectionhandler:
+## **Testing**
+There are some tests that you can start by uncommenting the following line in row 26 in the connectionhhandler:
 
 `//go test.INITTEST()`
 
