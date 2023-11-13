@@ -11,10 +11,11 @@ import (
 	"time"
 )
 
-const webServerAddress = "localhost:5431"
+var webServerAddress string
 
-func INITTEST() {
+func INITTEST(address string) {
 	time.Sleep(time.Second * 3)
+	webServerAddress = address
 	test()
 	fmt.Println("All test Finished")
 }

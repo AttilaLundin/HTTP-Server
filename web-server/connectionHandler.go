@@ -1,8 +1,8 @@
 package web_server
 
 import (
-	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"sync"
@@ -23,9 +23,6 @@ func StartWebServer() {
 
 	// start listening to a port
 	tcpListener := setupListener()
-
-	//TODO: Comment out if you want to run test
-	//go test.INITTEST()
 
 	// this is the main loop of the web server, handling each connection.
 	for {
@@ -54,36 +51,31 @@ func StartWebServer() {
 }
 
 func setupListener() *net.TCPListener {
-	for {
-		// init a reader
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Println("Enter the ip and port you want the web server to listen to in the format  <ip>:<port>  below:\n")
 
-		// some ports on windows don't work depending on machine, e.g. 5433. We use 5431 instead.
-		address, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println(err)
-			// restart loop until successful
-			continue
-		}
-
-		// remove delimiter /n or bugs
-		address = address[:len(address)-2]
-
-		// retrieve address from an existing tcp connection
-		tcpAddress, err := net.ResolveTCPAddr("tcp", address)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		// listen to retrieved address from tcp conn
-		tcpListener, err := net.ListenTCP("tcp", tcpAddress)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println("Web server now listening to address:", address)
-			return tcpListener
-		}
+	ip := os.Getenv("IP")
+	if ip == "" {
+		log.Fatal("Not a valid ip address")
 	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("Not a valid port")
+	}
+
+	address := ip + ":" + port
+
+	// retrieve address from an existing tcp connection
+	tcpAddress, err := net.ResolveTCPAddr("tcp", address)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// listen to retrieved address from tcp conn
+	tcpListener, err := net.ListenTCP("tcp", tcpAddress)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Web server now listening to address:", address)
+	return tcpListener
 }

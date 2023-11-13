@@ -1,0 +1,7 @@
+test/
+
+#TODO: uncomment the line below before building the web server
+#proxy-server/
+
+#TODO: uncomment the line below before building the proxy server
+#web-server/
